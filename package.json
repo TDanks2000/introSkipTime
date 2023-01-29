@@ -1,0 +1,18 @@
+{
+  "name": "introSkipTime",
+  "version": "1.0.0",
+  "main": "./src/main.js",
+  "type": "module",
+  "repository": "https://github.com/TDanks2000/introSkipTime.git",
+  "author": "Tommy Danks <tommydanks2000@hotmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./"
+  },
+  "dependencies": {
+    "commander": "^10.0.0",
+    "m3u8-parser": "^6.0.0",
+    "node-fetch": "^3.3.0"
+  }
+}
