@@ -31,6 +31,21 @@ export const parse = async (url) => {
     return false;
   });
 
+  // remove the unneeded segments from the manifest
+  manifest.segments = options;
+
+  // remove all the segments and the duration from the manifest
+  let newM3U8 = text.split("#EXT-X-ENDLIST")[0];
+  newM3U8 = newM3U8.split("#EXTINF")[0];
+
+  // add the #EXTINF duration to the new manifest and the segments after ea
+  newM3U8 += options
+    .map((option) => "#EXTINF:" + option.duration + ",\n" + option.uri)
+    .join("\n");
+
+  // add the #EXT-X-ENDLIST to the end of the new manifest
+  newM3U8 += "\n#EXT-X-ENDLIST";
+
   // go through the segments and add the base url if the segment is relative
   options.forEach((option) => {
     if (!isAbsolute(option.uri)) {
@@ -38,5 +53,8 @@ export const parse = async (url) => {
     }
   });
 
-  return options;
+  return {
+    options,
+    newM3U8,
+  };
 };
