@@ -36,43 +36,62 @@ export const hashImages = async (inputPath) => {
   return images;
 };
 
-export const compareHashes = async (arrays) => {
-  // first remove the black image hashes and then loop through all hashes and compare them to each other to find similar images return the biggest array of similar images
+export const compareHashes = async (array) => {
+  // loop through the array of hashes and compare them to each other and push the most similar images to an array and return the array with the most similar images
 
-  const similarImages = arrays.reduce((acc, current) => {
+  const similarImages = [];
+
+  for (const current of array) {
     const similar = [];
-    for (const compare of arrays) {
+    for (const compare of array) {
       if (current.hash === compare.hash && current.name !== compare.name) {
         similar.push(compare.name);
       }
     }
-    if (similar.length > acc.length) {
-      acc = similar;
+    if (similar.length > similarImages.length) {
+      similarImages.length = 0;
+      similarImages.push(...similar);
     }
-    return acc;
-  }, []);
+  }
 
-  // let similarImages = [];
-  // for (let i = 0; i < arrays.length; i++) {
-  //   const currentHash = arrays[i].hash;
-  //   const currentName = arrays[i].name;
+  return similarImages;
+
+  // const similarImages = arrays.reduce((acc, current) => {
   //   const similar = [];
-  //   for (let j = 0; j < arrays.length; j++) {
-  //     const compareHash = arrays[j].hash;
-  //     const compareName = arrays[j].name;
-  //     if (currentHash === compareHash && currentName !== compareName) {
-  //       similar.push(compareName);
+  //   for (const compare of arrays) {
+  //     if (current.hash === compare.hash && current.name !== compare.name) {
+  //       similar.push(compare.name);
   //     }
   //   }
-  //   if (similar.length > similarImages.length) {
-  //     similarImages = similar;
+  //   if (similar.length > acc.length) {
+  //     acc = similar;
   //   }
-  // }
+  //   return acc;
+  // }, []);
+
+  // return similarImages;
+};
+
+export const compareTwoHashArrays = (array1, array2) => {
+  // loop through the first array and compare the hashes to the second array and return the most similar images
+
+  const similarImages = [];
+
+  for (const current of array1) {
+    const similar = [];
+    for (const compare of array2) {
+      if (current.hash === compare.hash && current.name !== compare.name) {
+        similar.push(compare.name);
+      }
+    }
+    if (similar.length > similarImages.length) {
+      similarImages.length = 0;
+      similarImages.push(...similar);
+    }
+  }
 
   return similarImages;
 };
-
-// get the timestamp for the video from the image number and the framerate (every image is taken every 5th frame)
 
 export const getTimestamp = (image, framerate) => {
   const imageNumber = image.split(".")[0]?.replace(/[^0-9.]/g, "");

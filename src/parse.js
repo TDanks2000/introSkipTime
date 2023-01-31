@@ -5,7 +5,9 @@ const parser = new m3u8Parser.Parser();
 
 // check if the segments are absolute or relative
 const isAbsolute = (url) => {
-  return url.indexOf("://") > 0 || url.indexOf("//") === 0;
+  return (
+    url.startsWith("http") || url.startsWith("https") || url.startsWith("//")
+  );
 };
 
 const removeLastSegmentOfUrl = (url) => {
@@ -40,7 +42,13 @@ export const parse = async (url) => {
 
   // add the #EXTINF duration to the new manifest and the segments after ea
   newM3U8 += options
-    .map((option) => "#EXTINF:" + option.duration + ",\n" + option.uri)
+    .map((option) => {
+      // check if the segment is absolute or relative and remove the base url if it is absolute
+      if (isAbsolute(option.uri)) {
+        option.uri = option.uri.split("/").slice(-1)[0];
+      }
+      return `#EXTINF:${option.duration},\n${option.uri}`;
+    })
     .join("\n");
 
   // add the #EXT-X-ENDLIST to the end of the new manifest
