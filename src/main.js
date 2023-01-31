@@ -1,10 +1,11 @@
 import { program } from "commander";
 import { cleanUp, download } from "./download.js";
-import { convertToMp4 } from "./ffmpeg.js";
+import { convertToMp4, extractFrames } from "./ffmpeg.js";
 import { parse } from "./parse.js";
 import { utils } from "./utils/index.js";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
+import { hashImages } from "./image.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -28,17 +29,39 @@ const main = async () => {
   const filePath = path.join(seasonPath, "index.m3u8");
   const outputPath = path.join(seasonPath, "index.mp4");
 
+  const frames = path.join(__dirname, "../", "frames");
+  const tvShowFrames = path.join(frames, tvShow);
+  const seasonFrames = path.join(
+    tvShowFrames,
+    `S${utils.addZero(season)}E${utils.addZero(episode)}`
+  );
+
   const convert = await convertToMp4(filePath, outputPath, seasonPath);
 
-  if (convert) {
-    console.log("Cleaning up...");
-    cleanUp(seasonPath);
-  } else {
+  if (!convert) {
     console.log("Something went wrong...");
     process.exit(1);
   }
 
-  // console.log(downloaded);
+  console.log("Cleaning up...");
+  await cleanUp(seasonPath);
+
+  const framerate = convert?.frameRate;
+
+  const generateFrames = await extractFrames(
+    outputPath,
+    seasonFrames,
+    framerate,
+    5
+  );
+
+  if (!generateFrames) {
+    console.log("Something went wrong...");
+    process.exit(1);
+  }
+
+  const hashAllImages = await hashImages(seasonFrames);
+  console.log("Done!", hashAllImages);
 };
 
 main();

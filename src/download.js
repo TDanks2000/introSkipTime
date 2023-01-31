@@ -72,6 +72,7 @@ const saveNewM3U8 = async (filePath, newM3U8) => {
 
 export const cleanUp = async (folder) => {
   console.log("Cleaning up...");
+
   fs.readdir(folder, (err, files) => {
     if (err) {
       console.error(err);
