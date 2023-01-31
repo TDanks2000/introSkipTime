@@ -32,6 +32,7 @@ export const download = async (segments, tvShow, season, episode, newM3U8) => {
         buffer
       );
       console.log(`Downloaded and saved ${fileName}`);
+      return true;
     })
   );
 

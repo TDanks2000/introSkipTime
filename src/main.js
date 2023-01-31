@@ -87,13 +87,13 @@ const main = async () => {
   const secondEpisodeFramerate = convertSecondEpisode.frameRate;
 
   const firstEpisodeFrames = await extractFrames(
-    seasonPath,
+    firstEpisodeOutputPath,
     seasonFramesPath,
     firstEpisodeFramerate
   );
 
   const secondEpisodeFrames = await extractFrames(
-    secondSeasonPath,
+    secondEpisodeOutputPath,
     secondSeasonFramesPath,
     secondEpisodeFramerate
   );

@@ -72,21 +72,16 @@ export const compareHashes = async (array) => {
   // return similarImages;
 };
 
-export const compareTwoHashArrays = (array1, array2) => {
-  // loop through the first array and compare the hashes to the second array and return the most similar images
+export const compareTwoHashArrays = (array1, array2, tolerance = 0.15) => {
+  // compare two arrays of hashes and find the most similar images that match each other in each array, also include a tolerance for each compared hash
 
   const similarImages = [];
 
   for (const current of array1) {
-    const similar = [];
     for (const compare of array2) {
       if (current.hash === compare.hash && current.name !== compare.name) {
-        similar.push(compare.name);
+        similarImages.push(current.name);
       }
-    }
-    if (similar.length > similarImages.length) {
-      similarImages.length = 0;
-      similarImages.push(...similar);
     }
   }
 
