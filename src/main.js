@@ -5,7 +5,12 @@ import { parse } from "./parse.js";
 import { utils } from "./utils/index.js";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
-import { hashImages } from "./image.js";
+import {
+  compareHashes,
+  getTimestamp,
+  getTimeStampFromArray,
+  hashImages,
+} from "./image.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -61,7 +66,12 @@ const main = async () => {
   }
 
   const hashAllImages = await hashImages(seasonFrames);
-  console.log("Done!", hashAllImages);
+
+  const similarImages = await compareHashes(hashAllImages);
+
+  const getImageTime = await getTimeStampFromArray(similarImages, framerate);
+
+  console.log("Image time:", getImageTime);
 };
 
 main();
