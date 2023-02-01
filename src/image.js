@@ -1,14 +1,14 @@
-import { imageHash } from "image-hash";
+// import { imageHash } from "image-hash";
+import imghash from "imghash";
+import leven from "leven";
+
 import fs from "fs";
 import path from "path";
 
 export const getImageHash = async (image) => {
-  let hash = "";
+  let hash = await imghash.hash(image?.data, 16, "hex");
 
-  await imageHash(image, 16, false, (error, data) => {
-    if (error) console.log(error);
-    hash = data;
-  });
+  console.log(hash);
 
   return hash;
 };
@@ -72,16 +72,23 @@ export const compareHashes = async (array) => {
   // return similarImages;
 };
 
-export const compareTwoHashArrays = (array1, array2, tolerance = 0.15) => {
-  // compare two arrays of hashes and find the most similar images that match each other in each array, also include a tolerance for each compared hash
+export const compareTwoHashArrays = (array1, array2, tolerance = 12) => {
+  // convert each array to just the hashes
+
+  // loop through the first array and compare each hash to the second array and if the hash is similar push the image to an array and return the array with the most similar images using leven
 
   const similarImages = [];
 
   for (const current of array1) {
+    const similar = [];
     for (const compare of array2) {
-      if (current.hash === compare.hash && current.name !== compare.name) {
-        similarImages.push(current.name);
+      if (leven(current.hash, compare.hash) <= tolerance) {
+        similar.push(compare.name);
       }
+    }
+    if (similar.length > similarImages.length) {
+      similarImages.length = 0;
+      similarImages.push(...similar);
     }
   }
 

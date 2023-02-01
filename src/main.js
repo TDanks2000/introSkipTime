@@ -13,16 +13,19 @@ import {
   hashImages,
 } from "./image.js";
 
+import fs from "fs";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const main = async () => {
-  const url = `https://t-ca-1.dokicloud.one/_v10/74a8d7f00d9e6634c52806f15fc8f272ef7ad84b8ce6472bccf5729c8d377756e3a8e96c452a4e81a378c18dcda18558c11ee2ddc38bb65c0cdc209cde38df5c6f986222da6790f0fa9a8defdb9e73f7370312e0e86a7f4907adf49ebe8ed0fbd500a29385c7a93c39846be809099a9362abdf961866b3a366298d362ad2f904/360/index.m3u8`;
+  const url = `https://t-ca-1.dokicloud.one/_v10/3f1cfe93d3bc791285ce3d66939391f3393e40ad2b7dee485885897fd87f2a0020e1ac5e8f208f27851824715f95950a9db2e85f2a218b5187958eea9687bef52731ea56c1bf600738270ee6b1dd2e27025c14677089f4ea6384535b3527b24a13a927eee22c189af49fc261ab9fb8b6e48cfb955717f62c85373733f78ee129/360/index.m3u8`;
+
   const url2 = `https://t-eu-3.onthecloudcdn.com/_v10/ffb0dc4a3e18391c2158fade194785b3e1ee61be42fe220fa54afd4df9217e519d1ca000141736c4d23dcaa9d337a96a428a4d1f21af28753fb11a1a797e29ff872471348a4cfca43874476fb736b975d5e2afc5fbad9c8e611656242ed6c8d0f66fbb74f74b6748c874d1ead10729b0d919d82fff2db9727476cf0588dcfcbe/360/index.m3u8`;
 
-  const tvShow = "the-flash";
+  const tvShow = "big-mouth";
   const season = 1;
-  const episode = 2;
+  const episode = 1;
 
   const downloads = path.join(__dirname, "../", "downloads");
   const tvShowPath = path.join(downloads, tvShow);
@@ -54,43 +57,40 @@ const main = async () => {
   const firstEpisodeOutputPath = path.join(seasonPath, "index.mp4");
   const secondEpisodeOutputPath = path.join(secondSeasonPath, "index.mp4");
 
-  const { options: firstEpisodeOptions, newM3U8: newM3U8FirstEpisode } =
-    await parse(url);
-  const { options: secondEpisodeOptions, newM3U8: newM3U8SecondEpisode } =
-    await parse(url2);
-
+  const firstEpisodeParse = await parse(url);
   const downloadFirstEpisode = await download(
-    firstEpisodeOptions,
+    firstEpisodeParse?.options,
     tvShow,
     season,
     episode,
-    newM3U8FirstEpisode
+    firstEpisodeParse?.newM3U8
   );
-  const downloadSecondEpisode = await download(
-    secondEpisodeOptions,
-    tvShow,
-    season,
-    episode + 1,
-    newM3U8SecondEpisode
-  );
-
   const convertFirstEpisode = await convertToMp4(
     firstEpisodeFilePath,
     firstEpisodeOutputPath
+  );
+  const firstEpisodeFramerate = convertFirstEpisode.frameRate;
+  const firstEpisodeFrames = await extractFrames(
+    firstEpisodeOutputPath,
+    seasonFramesPath,
+    firstEpisodeFramerate
+  );
+  const firstEpisodeHashes = await hashImages(seasonFramesPath);
+
+  const secondEpisodeParse = await parse(url2);
+  const downloadSecondEpisode = await download(
+    secondEpisodeParse?.options,
+    tvShow,
+    season,
+    episode + 1,
+    secondEpisodeParse?.newM3U8
   );
   const convertSecondEpisode = await convertToMp4(
     secondEpisodeFilePath,
     secondEpisodeOutputPath
   );
 
-  const firstEpisodeFramerate = convertFirstEpisode.frameRate;
   const secondEpisodeFramerate = convertSecondEpisode.frameRate;
-
-  const firstEpisodeFrames = await extractFrames(
-    firstEpisodeOutputPath,
-    seasonFramesPath,
-    firstEpisodeFramerate
-  );
 
   const secondEpisodeFrames = await extractFrames(
     secondEpisodeOutputPath,
@@ -98,7 +98,6 @@ const main = async () => {
     secondEpisodeFramerate
   );
 
-  const firstEpisodeHashes = await hashImages(seasonFramesPath);
   const secondEpisodeHashes = await hashImages(secondSeasonFramesPath);
 
   const compareEpisodes = await compareTwoHashArrays(

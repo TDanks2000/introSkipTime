@@ -25,7 +25,7 @@ export const parse = async (url) => {
 
   // loop through the segments and add the duration to the total duration if the duration is less than 300 seconds (5 minutes)
   let totalDuration = 0;
-  const options = manifest.segments.filter((segment) => {
+  const options = await manifest.segments.filter((segment) => {
     if (totalDuration < 300) {
       totalDuration += segment.duration;
       return true;
@@ -41,7 +41,7 @@ export const parse = async (url) => {
   newM3U8 = newM3U8.split("#EXTINF")[0];
 
   // add the #EXTINF duration to the new manifest and the segments after ea
-  newM3U8 += options
+  newM3U8 += await options
     .map((option) => {
       // check if the segment is absolute or relative and remove the base url if it is absolute
       if (isAbsolute(option.uri)) {
@@ -52,10 +52,10 @@ export const parse = async (url) => {
     .join("\n");
 
   // add the #EXT-X-ENDLIST to the end of the new manifest
-  newM3U8 += "\n#EXT-X-ENDLIST";
+  newM3U8 += await "\n#EXT-X-ENDLIST";
 
   // go through the segments and add the base url if the segment is relative
-  options.forEach((option) => {
+  await options.forEach((option) => {
     if (!isAbsolute(option.uri)) {
       option.uri = removeLastSegmentOfUrl(url) + "/" + option.uri;
     }
